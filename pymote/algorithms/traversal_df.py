@@ -71,14 +71,13 @@ class DFT(NodeAlgorithm):
             
             node.status = 'VISITED'
         else:
-            if 'entry' in node.memory:
-                node.send(Message(destination=node.memory['entry'], header='Return', data=message.data))
-                
-                nodeNeighbors = list(node.memory[self.neighborsKey])
-                nodeNeighbors.remove(node.memory['entry'])
+            node.send(Message(destination=node.memory['entry'], header='Return', data=message.data))
+            
+            nodeNeighbors = list(node.memory[self.neighborsKey])
+            nodeNeighbors.remove(node.memory['entry'])
 
-                for i in range(len(nodeNeighbors)):
-                    node.send(Message(destination=nodeNeighbors[i], header='Visited', data=message.data))
+            for i in range(len(nodeNeighbors)):
+                node.send(Message(destination=nodeNeighbors[i], header='Visited', data=message.data))
             
             node.status = 'DONE'
 
