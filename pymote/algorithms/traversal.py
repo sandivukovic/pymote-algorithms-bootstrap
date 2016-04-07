@@ -1,6 +1,7 @@
 from pymote.algorithm import NodeAlgorithm
 from pymote.message import Message
 
+
 class DFT(NodeAlgorithm):
     required_params = ('informationKey',)
     default_params = {'neighborsKey': 'Neighbors', 'unvisitedNodes': 'Nodes', 'entry': -1, 'initiator': False}
@@ -11,6 +12,7 @@ class DFT(NodeAlgorithm):
             node.memory[self.neighborsKey] = \
                 node.compositeSensor.read()['Neighbors']
             node.status = 'IDLE'
+            
             if self.informationKey in node.memory:
                 node.status = 'INITIATOR'
                 ini_nodes.append(node)
@@ -19,45 +21,40 @@ class DFT(NodeAlgorithm):
                                                  destination=ini_node))
 
     def initiator(self, node, message):
-        node.status = 'initiator'
-        #initiator = True
-        node.memory['unvisitedNodes'] = list(node.memory[self.neighborsKey])
-        node.memory['initiator'] = True
-        #unvisited_nodes.append(node.memory[self.neighborsKey])
+        node.memory[self.unvisitedNodes] = list(node.memory[self.neighborsKey])
+        node.memory[self.initiator] = True
         self.visit(node, message)
 
     def idle(self, node, message):
-        #entry = node
-        node.memory['entry'] = node
-        node.memory['unvisitedNodes'].remove(node)
-        node.memory['initiator'] = False
-        #unvisited_nodes.remove(node)
-        #initiator = False
+        node.memory[self.entry] = message.source
+        node.memory[self.unvisitedNodes] = list(node.memory[self.neighborsKey])
+        node.memory[self.unvisitedNodes].remove(message.source)
+        node.memory[self.initiator] = False
         self.visit(node, message)
 
     def visited(self, node, message):
         if message.header == 'Traversal':
-            node.memory['unvisitedNodes'].remove(entry)
-            #unvisited_nodes.remove(entry)
-            node.send(Message(destination=entry,
+            node.memory[self.unvisitedNodes].remove(message.source)
+            node.send(Message(destination=message.source,
                                   header='Backedge',
                                   data=message.data))
         elif message.header == 'Return':
+            node.memory[self.unvisitedNodes].remove(message.source)
             self.visit(node, message)
         elif message.header == 'Backedge':
+            node.memory[self.unvisitedNodes].remove(message.source)
             self.visit(node, message)
 
     def visit(self, node, message):
-        if len(unvisited_nodes) != 0:
-            #next_node = unvisited_nodes[node.id + 1]
-            next_node = node.memory['unvisitedNodes'][0]
+        if len(node.memory[self.unvisitedNodes]) != 0:
+            next_node = node.memory[self.unvisitedNodes][0]
             node.send(Message(destination=next_node,
                                   header='Traversal',
                                   data=message.data))
             node.status = 'VISITED'
         else:
-            if initiator == False:
-                node.send(Message(destination=entry,
+            if node.memory[self.initiator] == False:
+                node.send(Message(destination=node.memory[self.entry],
                                       header='Return',
                                       data=message.data))
             node.status = 'DONE'
@@ -71,6 +68,7 @@ class DFT(NodeAlgorithm):
               'DONE': done,
               'VISITED': visited,
              }
+
 
 class DF_STAR(NodeAlgorithm):
     required_params = {'informationKey', }
