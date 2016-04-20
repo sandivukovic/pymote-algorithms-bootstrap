@@ -37,10 +37,9 @@ class Saturation(NodeAlgorithm):
 
     def active(self, node, message):
 
-        if message.header == 'Message':
-            self.process_message(self, node, message)
-            nodeNeighbors = list(node.memory[self.neighborsKey])
-            nodeNeighbors.remove(message.source)
+        if message.header == 'Message': 
+        	self.process_message(self, node, message) 
+        	node.memory['neighbors'].remove(message.source)
 
         if len(node.memory['neighbors']) == 1:
             self.prepare_message(node, message)
@@ -61,6 +60,8 @@ class Saturation(NodeAlgorithm):
         raise NotImplementedError
     def resolve(self, node, message):
         node.status = 'SATURATED'
+    def saturated(self, node, message): 
+    	pass
 
     STATUS = {
                 'AVAILABLE': available,
