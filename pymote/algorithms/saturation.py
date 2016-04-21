@@ -2,6 +2,7 @@ from pymote.algorithm import NodeAlgorithm
 from pymote.message import Message
 
 class Saturation(NodeAlgorithm):
+
     required_params = {}
     default_params = {'neighborsKey': 'Neighbors'}
 
@@ -54,12 +55,16 @@ class Saturation(NodeAlgorithm):
 
     def initialize(self, node, message):
         raise NotImplementedError
+
     def prepare_message(self, node, message):
         m = ['Saturation']
+
     def process_message(self, node, message):
         raise NotImplementedError
+
     def resolve(self, node, message):
         node.status = 'SATURATED'
+
     def saturated(self, node, message): 
     	pass
 
