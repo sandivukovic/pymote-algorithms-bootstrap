@@ -86,12 +86,13 @@ def tree_network():
 	net.add_node(pos=(200, 430), commRange=130)
 	net.add_node(pos=(400, 400), commRange=150)
 	net.add_node(pos=(480, 380), commRange=130)
-	net.add_node(pos=(320, 300), commRange=150)
+	net.add_node(pos=(320, 300), commRange=140)
 	net.add_node(pos=(15, 330), commRange=100)
 	net.add_node(pos=(140, 350), commRange=150)
 	net.add_node(pos=(370, 215), commRange=140)
 	net.add_node(pos=(511, 405), commRange=50)
 	net.add_node(pos=(490, 354), commRange=50)
+	net.add_node(pos=(200, 300), commRange=105)
 	return net
 
 def test_network():
