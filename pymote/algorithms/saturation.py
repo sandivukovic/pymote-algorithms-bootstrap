@@ -85,16 +85,17 @@ class Median(Saturation):
         node.memory['node_number'] = 0
 
     def prepare_message(self, node, message):
-        message.data = node.memory['node_number'] + 1
+        node.memory[message.source] += 1
+        #node.memory['node_number'] += 1
+        #message.data = node.memory['node_number']
 
     def process_message(self, node, message):
-        node.memory['node_number'] += message.data
+        node.memory[message.source]
 
-        if len(node.memory['neighbors']) == 0:
-            node.memory['node_number'] += 1
 
     def resolve(self, node, message):
         super(Median, self).resolve(node, message)
+
 
     def median(self, node, message):
         pass
