@@ -98,6 +98,7 @@ class Median(Saturation):
         #node.memory['distance_sum'] += 1
         message.data = node.memory['distance_sum']
 
+
     def process_message(self, node, message):
         pass
 
