@@ -82,15 +82,24 @@ class Median(Saturation):
             self.resolve(node, message)
 
     def initialize(self, node, message):
-        node.memory['node_number'] = 0
+        node.memory['distance_sum'] = {}
+        node.memory['distance_sum'][node.id] = 0
+        #for i in node.memory[self.neighborsKey]:
+        #    node.memory['distance_sum'][i.id] = 0
+
+        #node.memory['distance_sum'] = {}
+        #node.memory['distance_sum'][str(message.source)] = 0
+
 
     def prepare_message(self, node, message):
-        node.memory[message.source] += 1
-        #node.memory['node_number'] += 1
-        #message.data = node.memory['node_number']
+        test = node.memory['distance_sum'].get(node.id)
+        test += 1
+        node.memory['distance_sum'][node.id] = test
+        #node.memory['distance_sum'] += 1
+        message.data = node.memory['distance_sum']
 
     def process_message(self, node, message):
-        node.memory[message.source]
+        pass
 
 
     def resolve(self, node, message):
