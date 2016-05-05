@@ -29,7 +29,7 @@ class Saturation(NodeAlgorithm):
 
         node.memory['neighbors'] = list(node.memory[self.neighborsKey])
         if len(node.memory['neighbors']) == 1:
-            self.prepare_message(node, message)
+            message = self.prepare_message(node, message)
             node.memory['parent'] = node.memory['neighbors'].pop()
             node.send(Message(destination=node.memory['parent'], header='Message', data=message.data))
             node.status = 'PROCESSING'
@@ -43,7 +43,7 @@ class Saturation(NodeAlgorithm):
             node.memory['neighbors'].remove(message.source)
 
         if len(node.memory['neighbors']) == 1:
-            self.prepare_message(node, message)
+            message = self.prepare_message(node, message)
             node.memory['parent'] = node.memory['neighbors'].pop()
             node.send(Message(destination=node.memory['parent'], header='Message', data=message.data))
             node.status = 'PROCESSING'
@@ -55,11 +55,13 @@ class Saturation(NodeAlgorithm):
 
     def initialize(self, node, message):
         pass
+
     def prepare_message(self, node, message):
-        m = ['Saturation']
+        pass
 
     def process_message(self, node, message):
         pass
+
     def resolve(self, node, message):
         node.status = 'SATURATED'
 
@@ -73,6 +75,7 @@ class Saturation(NodeAlgorithm):
                 'SATURATED': saturated
              }
 
+
 class Median(Saturation):
 
     def processing(self, node, message):
@@ -83,29 +86,39 @@ class Median(Saturation):
 
     def initialize(self, node, message):
         node.memory['distance_sum'] = {}
-        node.memory['distance_sum'][node.id] = 0
-        #for i in node.memory[self.neighborsKey]:
-        #    node.memory['distance_sum'][i.id] = 0
-
-        #node.memory['distance_sum'] = {}
-        #node.memory['distance_sum'][str(message.source)] = 0
-
+        node.memory['distance_sum'][node] = 1
 
     def prepare_message(self, node, message):
-        test = node.memory['distance_sum'].get(node.id)
-        test += 1
-        node.memory['distance_sum'][node.id] = test
-        #node.memory['distance_sum'] += 1
-        message.data = node.memory['distance_sum']
-
+        message = Message()
+        message.data = node.memory['distance_sum'][node]
+        message.header = 'Message'
+        return message
 
     def process_message(self, node, message):
-        pass
-
+        node.memory['distance_sum'][message.source] = message.data
+        node.memory['distance_sum'][node] += message.data
 
     def resolve(self, node, message):
-        super(Median, self).resolve(node, message)
-
+        for neighbor in node.memory[self.neighborsKey]:
+            # for all neighbors calculate G[y,x]
+            G = node.memory['distance_sum'][node] - \
+                2*node.memory['distance_sum'][neighbor]
+            if G <= 0:
+                # neighbor is median or on the way to the median
+                if neighbor != node.memory['parent']:
+                    # send message to neighbor only if it is not a parent
+                    node.send(
+                        Message(header='Median', destination=neighbor,
+                                data=node.memory['distance_sum'][node] -
+                                node.memory['distance_sum'][neighbor])
+                    )
+                if G == 0:
+                    # this node is median also
+                    node.status = 'MEDIAN'
+                break
+        else:
+            # if all neighbors' G > 0 then this node is the only median
+            node.status = 'MEDIAN'
 
     def median(self, node, message):
         pass
